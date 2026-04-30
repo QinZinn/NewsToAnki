@@ -1,19 +1,20 @@
-# News-to-Anki CLI
+# News-to-Anki CLI 🚀
 
-A professional Python CLI tool that automates the extraction of target vocabulary from English news articles and generates Anki flashcards for efficient language learning.
+A professional Python-based CLI tool designed to streamline language learning by automating the extraction of target vocabulary from news articles and generating ready-to-use Anki flashcards (.apkg).
 
-## Features
-- **Article Scraping**: Extracts text and title from any English news URL.
-- **NLP Processing**: Tokenizes sentences and words, filters out common stopwords, and identifies candidate vocabulary.
-- **Offline Dictionary Lookup**: Enriches vocabulary with definitions and parts of speech using WordNet (NLTK).
-- **Anki Deck Generation**: Packages everything into a ready-to-import `.apkg` file.
-- **Customizable Blacklist**: Uses a `known_words.txt` file to skip words you already know.
+![Anki Demo](assets/1000030880.jpg)
 
-## Prerequisites
-- Python 3.8+
-- [Anki](https://apps.ankiweb.net/) (to import the generated decks)
+## 🌟 Key Features
 
-## Installation
+- **Smart Scraping**: Built-in support for popular news outlets like **VnExpress (English)** and **BBC News**, with a robust generic fallback for other domains.
+- **Advanced NLP**: Implements **Triple-Pass Lemmatization** (Verb, Noun, Adjective) to reduce redundancy and extract only the most meaningful base forms of words.
+- **Offline Dictionary Enrichment**: Automatically fetches definitions and parts of speech using the **WordNet** database (via NLTK), ensuring fast and private lookups.
+- **Modern Workflow**: Managed by `uv` for lightning-fast dependency management and consistent environments.
+- **Customizable Blacklist**: Easily skip words you already know by adding them to `known_words.txt`.
+
+## 🛠️ Installation
+
+This project uses [uv](https://github.com/astral-sh/uv) for dependency management.
 
 1. **Clone the repository**:
    ```bash
@@ -21,51 +22,56 @@ A professional Python CLI tool that automates the extraction of target vocabular
    cd NewsToAnki/Backend
    ```
 
-2. **Create a virtual environment (optional but recommended)**:
+2. **Sync dependencies**:
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv sync
    ```
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 🚀 Usage
 
-## Usage
-
-Run the tool from the `Backend` directory using `python main.py`.
+Run the tool from the `Backend/` directory using `uv run`.
 
 ### Basic Command
 ```bash
-python main.py --url "https://www.bbc.com/news/world-61343815"
+uv run main.py --url "https://e.vnexpress.net/news/news/education/vietnam-wins-four-gold-medals-at-international-chemistry-olympiad-4775486.html"
 ```
 
-### Custom Output Filename
+### Custom Output
 ```bash
-python main.py --url "https://www.bbc.com/news/world-61343815" --output "my_vocab.apkg"
+uv run main.py --url "https://www.bbc.com/news/articles/c0jje79z7jno" --output "bbc_vocab.apkg"
 ```
 
 ### Arguments
-- `--url`: (Required) The URL of the English news article to process.
+- `--url`: (Required) The URL of the news article to process.
 - `--output`: (Optional) The name of the output `.apkg` file (default: `English_News_Vocab.apkg`).
 
-## Project Structure
-```
-Backend/
-├── main.py              # Entry point for the CLI
-├── known_words.txt      # Blacklist for skipping known words
-├── requirements.txt     # Python dependencies
-└── src/                 # Core logic modules
-    ├── __init__.py
-    ├── anki_generator.py
-    ├── dictionary_lookup.py
-    ├── processor.py
-    └── scraper.py
+## 🧪 Testing
+
+The project includes unit tests for the core processing logic. To run them:
+
+```bash
+uv run test_processor.py
 ```
 
-## How it Works
-1. **Scraper**: Uses `requests` and `BeautifulSoup` to fetch and parse the article.
-2. **Processor**: Uses `nltk` for tokenization and filtering. It skips words shorter than 5 characters, standard stop words, and words listed in `known_words.txt`.
-3. **Dictionary**: Uses `WordNet` via `nltk` to find definitions and parts of speech.
-4. **Generator**: Uses `genanki` to create Anki notes and package them into a deck.
+## 📂 Project Structure
+
+```text
+NewsToAnki/
+├── Backend/
+│   ├── main.py              # CLI Entry Point
+│   ├── test_processor.py    # Unit Tests
+│   ├── known_words.txt      # Vocabulary Blacklist
+│   ├── pyproject.toml       # uv Configuration
+│   ├── uv.lock              # Lockfile
+│   └── src/                 # Core Package
+│       ├── __init__.py
+│       ├── scraper.py       # News Scraping Logic
+│       ├── processor.py     # NLP & Lemmatization
+│       ├── dictionary_lookup.py # WordNet Integration
+│       └── anki_generator.py    # .apkg Generation
+├── assets/                  # Documentation Assets
+└── README.md                # Project Documentation
+```
+
+## 📄 License
+MIT License. See [LICENSE](LICENSE) for details.

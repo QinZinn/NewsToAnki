@@ -1,19 +1,27 @@
 import logging
 import nltk
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 
 logger = logging.getLogger(__name__)
 
 def setup_nltk():
     """
     Ensures that required NLTK datasets/models are downloaded.
-    Specifically checks for the 'stopwords' corpus.
+    Specifically checks for the 'stopwords', 'wordnet', and 'omw-1.4' corpora.
     """
-    try:
-        nltk.data.find('corpora/stopwords')
-    except (LookupError, OSError):
-        logger.info("Downloading NLTK stopwords corpus...")
-        nltk.download('stopwords', quiet=True)
+    resources = [
+        ('corpora/stopwords', 'stopwords'),
+        ('corpora/wordnet', 'wordnet'),
+        ('corpora/omw-1.4', 'omw-1.4')
+    ]
+    
+    for path, pkg in resources:
+        try:
+            nltk.data.find(path)
+        except (LookupError, OSError):
+            logger.info(f"Downloading NLTK {pkg} corpus...")
+            nltk.download(pkg, quiet=True)
 
 def load_known_words(filepath: str) -> set:
     """
@@ -45,6 +53,7 @@ def process_data(article_data: dict, known_words_file: str = "known_words.txt") 
     Filters applied:
     - Lowercase normalization
     - Strip punctuation and non-alphabetic tokens
+    - Lemmatization (base form reduction)
     - Remove standard English stop words
     - Keep only words with length >= 5
     - Skip words in the "Known Words Blacklist"
@@ -59,6 +68,7 @@ def process_data(article_data: dict, known_words_file: str = "known_words.txt") 
     """
     setup_nltk()
     
+    lemmatizer = WordNetLemmatizer()
     stop_words = set(stopwords.words('english'))
     known_words = load_known_words(known_words_file)
     
@@ -77,23 +87,27 @@ def process_data(article_data: dict, known_words_file: str = "known_words.txt") 
             # 2. Cleaning: Must be alphabetic
             if not word_lower.isalpha():
                 continue
+            
+            # 3. Lemmatization: Get the base form
+            # Applying verb, noun, and adjective lemmatization to catch most variations (e.g., 'largest' -> 'large')
+            word_lemma = lemmatizer.lemmatize(lemmatizer.lemmatize(lemmatizer.lemmatize(word_lower, pos='v'), pos='n'), pos='a')
                 
-            # 3. Length constraint
-            if len(word_lower) < 5:
+            # 4. Length constraint
+            if len(word_lemma) < 5:
                 continue
                 
-            # 4. Stop-words removal
-            if word_lower in stop_words:
+            # 5. Stop-words removal
+            if word_lemma in stop_words:
                 continue
             
-            # 5. Known words blacklist removal
-            if word_lower in known_words:
+            # 6. Known words blacklist removal
+            if word_lemma in known_words:
                 continue
                 
-            # 6. Deduplication & Context mapping
+            # 7. Deduplication & Context mapping
             # If the word is already in our dictionary, we skip to keep the *first* encountered context
-            if word_lower not in unique_vocabulary:
-                unique_vocabulary[word_lower] = {
+            if word_lemma not in unique_vocabulary:
+                unique_vocabulary[word_lemma] = {
                     "context": original_sentence
                 }
                 
