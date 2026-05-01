@@ -65,6 +65,29 @@ def load_known_words(filepath: str) -> set:
         logger.error(f"Error reading {filepath}: {e}. Starting with an empty blacklist.")
         return set()
 
+def update_known_words(new_words_list: list, filepath: str = "known_words.txt"):
+    """
+    Appends new words to the known words file, removes duplicates, and sorts alphabetically.
+    
+    Args:
+        new_words_list (list): List of new words to add.
+        filepath (str): Path to the text file containing known words.
+    """
+    existing_words = load_known_words(filepath)
+    # Combine, lowercase, and remove duplicates
+    all_words = existing_words.union({w.strip().lower() for w in new_words_list if w.strip()})
+    
+    # Sort alphabetically
+    sorted_words = sorted(list(all_words))
+    
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            for word in sorted_words:
+                f.write(f"{word}\n")
+        logger.info(f"Successfully updated {filepath}. Total known words: {len(sorted_words)}.")
+    except Exception as e:
+        logger.error(f"Error writing to {filepath}: {e}")
+
 def process_data(article_data: dict, known_words_file: str = "known_words.txt") -> dict:
     """
     Processes the raw tokenized article data to extract target vocabulary.

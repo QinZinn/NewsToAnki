@@ -4,7 +4,7 @@ import sys
 import os
 
 from src.scraper import fetch_article
-from src.processor import process_data
+from src.processor import process_data, update_known_words
 from src.dictionary_lookup import lookup_definitions
 from src.anki_generator import generate_anki_deck
 
@@ -29,7 +29,6 @@ def main():
     parser.add_argument(
         "--url", 
         type=str, 
-        required=True, 
         help="The URL of the English news article to process."
     )
     parser.add_argument(
@@ -38,7 +37,31 @@ def main():
         default="English_News_Vocab.apkg",
         help="The name of the output .apkg file (default: English_News_Vocab.apkg)."
     )
+    parser.add_argument(
+        "--mark-known",
+        action="store_true",
+        help="If provided, all successfully extracted words will be added to known_words.txt."
+    )
+    parser.add_argument(
+        "--add-known",
+        type=str,
+        help="A comma-separated list of words to add to known_words.txt. If provided, the tool exits after adding."
+    )
     args = parser.parse_args()
+
+    # Handle --add-known logic
+    if args.add_known:
+        new_words = [w.strip() for w in args.add_known.split(",") if w.strip()]
+        if new_words:
+            update_known_words(new_words)
+            logger.info(f"Added {len(new_words)} words to known_words.txt.")
+        else:
+            logger.warning("No valid words provided to --add-known.")
+        sys.exit(0)
+
+    # Validate --url if --add-known is not provided
+    if not args.url:
+        parser.error("--url is required unless --add-known is provided.")
 
     url = args.url
     output_filename = args.output
@@ -87,6 +110,15 @@ def main():
             logger.info(f"Pipeline completed successfully!")
             logger.info(f"Anki deck saved to: {deck_path}")
             logger.info("==================================================")
+            
+            # Handle --mark-known logic
+            if args.mark_known:
+                logger.info("--- Phase 5: Updating Known Words ---")
+                extracted_words = list(enriched_data.keys())
+                if extracted_words:
+                    update_known_words(extracted_words)
+                else:
+                    logger.warning("No words to mark as known.")
         else:
             logger.error("Failed to generate Anki package file.")
             sys.exit(1)

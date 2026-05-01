@@ -41,9 +41,23 @@ uv run main.py --url "https://e.vnexpress.net/news/news/education/vietnam-wins-f
 uv run main.py --url "https://www.bbc.com/news/articles/c0jje79z7jno" --output "bbc_vocab.apkg"
 ```
 
+### Managing Known Words
+You can automate the update of `known_words.txt` to avoid seeing the same words again:
+
+- **Auto-mark as known**: Append all extracted words from an article to your blacklist after generation.
+  ```bash
+  uv run main.py --url "https://..." --mark-known
+  ```
+- **Manual add**: Add a list of words directly to the blacklist and exit.
+  ```bash
+  uv run main.py --add-known "apple, banana, cherry"
+  ```
+
 ### Arguments
-- `--url`: (Required) The URL of the news article to process.
-- `--output`: (Optional) The name of the output `.apkg` file (default: `English_News_Vocab.apkg`).
+- `--url`: The URL of the news article to process (required unless using `--add-known`).
+- `--output`: (Optional) The name of the output `.apkg` file.
+- `--mark-known`: (Optional) Automatically add extracted words to `known_words.txt`.
+- `--add-known`: (Optional) A comma-separated list of words to add to `known_words.txt`.
 
 ## 🧪 Testing
 
